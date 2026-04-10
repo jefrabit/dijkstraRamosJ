@@ -92,7 +92,7 @@ function calculateAndShowRoute(originId, destId) {
 
 function displayResults(result) {
     const panel = document.getElementById('resultados');
-    document.getElementById('distanciaTotal').textContent = `${result.distance.toFixed(2)} km`;
+    document.getElementById('distanciaTotal').textContent = `${result.distance.toFixed(1)}km`;
     document.getElementById('numDepartamentos').textContent = result.path.length;
 
     const trayecto = document.getElementById('trayecto');
@@ -100,7 +100,7 @@ function displayResults(result) {
     result.path.forEach((dep, i) => {
         const li = document.createElement('li');
         li.textContent = dep.nombre;
-        li.className = i === 0 ? 'origin' : i === result.path.length - 1 ? 'destination' : 'intermediate';
+        li.className = i === 0 ? 'origin' : i === result.path.length - 1 ? 'destino' : 'intermedio';
         trayecto.appendChild(li);
     });
     panel.classList.remove('hidden');

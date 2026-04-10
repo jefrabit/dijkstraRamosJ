@@ -9,7 +9,7 @@ const GOOGLE_MAPS_API_KEY = 'AIzaSyDY8Gbdxg03Bh604ZB-IdrrZtQLMeFTOPU';
 const CONFIG = {
     MAP_CONFIG: {
         center: { lat: -10, lng: -75 },
-        zoom: 5,
+        zoom: 6,
         mapTypeId: 'roadmap'
     },
 
@@ -21,10 +21,10 @@ const CONFIG = {
         defaultStroke: '#334155',
         defaultStrokeWeight: 1.5,
         hoverFillOpacity: 0.5,
-        routeStroke: '#dc2626',
+        routeStroke: '#8b5cf6',
         routeStrokeWeight: 4,
         routeFillOpacity: 0.55,
-        originMarker: '#22c55e',
+        originMarker: '#8b5cf6',
         destMarker: '#ef4444'
     }
 };

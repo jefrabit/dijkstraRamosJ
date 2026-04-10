@@ -5,90 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dijkstra - Departamentos del Perú</title>
     <link rel="stylesheet" href="src/styles/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="notification-container" class="notification-container"></div>
-    <div class="app-container">
-        <header class="app-header">
-            <h1>Algoritmo de Dijkstra - Departamentos del Peru</h1>
-            <p class="subtitle">Encuentra la ruta mas corta entre departamentos</p>
-        </header>
 
-        <main class="main-content">
-            <aside class="controls-panel">
-                <div class="control-group">
-                    <label for="origen">Punto de Inicio</label>
-                    <select id="origen">
-                        <option value="">Seleccionar departamento de inicio...</option>
-                    </select>
+    <div class="app-wrapper">
+        <div class="sidebar">
+            <div class="titulo">
+                <h1>dijkstraRamosJ</h1>
+            </div>
+
+            <div>
+                <label for="origen">Departamento de inicio</label>
+                <select id="origen">
+                    <option value="">-- Seleccionar --</option>
+                </select>
+
+                <label for="destino">Departamento destino</label>
+                <select id="destino">
+                    <option value="">-- Seleccionar --</option>
+                </select>
+
+                <button id="calcularRuta">Calcular ruta</button>
+            </div>
+
+            <div id="resultados" class="hidden">
+                <h3>Resultados</h3>
+                <div class="info-row">
+                    <span>Distancia total:</span>
+                    <span id="distanciaTotal">--</span>
                 </div>
-
-                <div class="control-group">
-                    <label for="destino">Destino</label>
-                    <select id="destino">
-                        <option value="">Seleccionar departamento destino...</option>
-                    </select>
+                <div class="info-row">
+                    <span>Departamentos:</span>
+                    <span id="numDepartamentos">--</span>
                 </div>
+                <ol id="trayecto"></ol>
+            </div>
 
-                <button id="calcularRuta" class="btn-calculate">
-                    Encontrar camino
-                </button>
+            <div class="leyenda">
+                <div class="leyenda-item"><span class="punto inicio"></span>Inicio</div>
+                <div class="leyenda-item"><span class="punto fin"></span>Destino</div>
+                <div class="leyenda-item"><span class="punto ruta"></span>Ruta</div>
+                <div class="leyenda-item"><span class="punto normal"></span>Departamento</div>
+            </div>
+        </div>
 
-                <div id="resultados" class="results-panel hidden">
-                    <h3>Resultados</h3>
-                    <div class="result-item">
-                        <span class="label">Distancia total:</span>
-                        <span id="distanciaTotal" class="value">--</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="label">Departamentos:</span>
-                        <span id="numDepartamentos" class="value">--</span>
-                    </div>
-                    <div class="route-list">
-                        <h4>Trayecto:</h4>
-                        <ol id="trayecto"></ol>
-                    </div>
-                </div>
-
-                <div class="legend">
-                    <h4>Leyenda</h4>
-                    <div class="legend-item">
-                        <span class="color-dot origen"></span>
-                        <span>Inicio</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="color-dot destino"></span>
-                        <span>Destino</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="color-dot departamento"></span>
-                        <span>Departamento</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="color-dot ruta"></span>
-                        <span>Ruta optima</span>
-                    </div>
-                </div>
-            </aside>
-
-            <section class="map-container">
-                <div id="map"></div>
-                <div id="map-loading" class="map-loading">
-                    <div class="spinner"></div>
-                    <p>Cargando mapa...</p>
-                </div>
-            </section>
-        </main>
-
-        <footer class="app-footer">
-            <p>Algoritmo de Dijkstra - Proyecto Universitario</p>
-        </footer>
+        <div class="map-area">
+            <div id="map"></div>
+            <div id="map-loading" class="map-loading">
+                <div class="loader"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Coloca tu API Key de Google Maps en el archivo config.js -->
     <script src="src/config.js"></script>
     <script src="src/data/departamentos.js"></script>
     <script src="src/algorithms/dijkstra.js"></script>
