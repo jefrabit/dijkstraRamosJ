@@ -1,18 +1,45 @@
-# Algoritmo de Dijkstra - Rutas del Perú
+# Algoritmo de Dijkstra - Departamentos del Peru
 
-Implementación del algoritmo de Dijkstra para encontrar la ruta más corta entre departamentos del Perú, utilizando geolocalización real y visualización en Google Maps.
+Implementacion del algoritmo de Dijkstra para encontrar la ruta mas corta entre departamentos del Peru, con visualizacion en Google Maps.
 
-## Descripción del Proyecto
+## Requisitos
 
-Este proyecto es una aplicación web educativa que implementa el **algoritmo de Dijkstra** desde cero para calcular la ruta óptima entre departamentos del Perú. Utiliza coordenadas geográficas reales y visualiza los resultados interactivamente en un mapa.
+- Google Maps API Key
+- Navegador web
 
-### Características Principales
+## Configuracion
 
-- Implementación manual del algoritmo de Dijkstra (sin librerías externas)
-- Cálculo de distancias usando la fórmula de Haversine
-- Visualización interactiva con Google Maps API
-- Interfaz gráfica para seleccionar origen y destino
-- Resaltado de la ruta óptima en el mapa
-- Mostrar distancia total y listado de departamentos recorrido
+1. Obtener API Key en https://console.cloud.google.com/google/maps-apis
+2. Abrir `src/config.js` y reemplazar `TU_API_KEY_AQUI` con tu clave
 
-## Estructura del Proyecto
+## Uso
+
+1. Abrir `index.html` en un navegador
+2. Seleccionar departamento de inicio
+3. Seleccionar departamento destino
+4. Clic en "Encontrar camino"
+
+## Estructura
+
+```
+├── index.html
+├── src/
+│   ├── config.js
+│   ├── main.js
+│   ├── algorithms/dijkstra.js
+│   ├── data/departamentos.js
+│   ├── map/map.js
+│   └── styles/style.css
+└── peru-geojson/
+    └── peru_departamental_simple.geojson
+```
+
+## Detalles tecnicos
+
+- Algoritmo de Dijkstra con Min-Heap binario
+- Distancias calculadas con formula de Haversine
+- Poligonos de departamentos cargados desde GeoJSON
+- Mapa visual con Google Maps API
+- 25 departamentos con conexiones entre vecinos
+
+## Proyecto Universitario

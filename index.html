@@ -3,51 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijkstra - Carreteras del Perú</title>
+    <title>Dijkstra - Departamentos del Perú</title>
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="notification-container" class="notification-container"></div>
     <div class="app-container">
         <header class="app-header">
-            <h1>🛣️ Algoritmo de Dijkstra - Carreteras del Perú</h1>
-            <p class="subtitle">Encuentra la ruta más corta usando la red vial del Perú</p>
+            <h1>Algoritmo de Dijkstra - Departamentos del Peru</h1>
+            <p class="subtitle">Encuentra la ruta mas corta entre departamentos</p>
         </header>
 
         <main class="main-content">
             <aside class="controls-panel">
                 <div class="control-group">
-                    <label for="origen">📍 Punto de Inicio</label>
+                    <label for="origen">Punto de Inicio</label>
                     <select id="origen">
-                        <option value="">Seleccionar punto de inicio...</option>
+                        <option value="">Seleccionar departamento de inicio...</option>
                     </select>
                 </div>
 
                 <div class="control-group">
-                    <label for="destino">🏁 Destino</label>
+                    <label for="destino">Destino</label>
                     <select id="destino">
-                        <option value="">Seleccionar destino...</option>
+                        <option value="">Seleccionar departamento destino...</option>
                     </select>
                 </div>
 
                 <button id="calcularRuta" class="btn-calculate">
-                    ⚡ Calcular Ruta
+                    Encontrar camino
                 </button>
 
                 <div id="resultados" class="results-panel hidden">
-                    <h3>📊 Resultados</h3>
+                    <h3>Resultados</h3>
                     <div class="result-item">
                         <span class="label">Distancia total:</span>
                         <span id="distanciaTotal" class="value">--</span>
                     </div>
                     <div class="result-item">
-                        <span class="label">Segmentos:</span>
+                        <span class="label">Departamentos:</span>
                         <span id="numDepartamentos" class="value">--</span>
                     </div>
                     <div class="route-list">
-                        <h4>Trayecto por carreteras:</h4>
+                        <h4>Trayecto:</h4>
                         <ol id="trayecto"></ol>
                     </div>
                 </div>
@@ -63,12 +64,12 @@
                         <span>Destino</span>
                     </div>
                     <div class="legend-item">
-                        <span class="color-dot conexiones"></span>
-                        <span>Carreteras</span>
+                        <span class="color-dot departamento"></span>
+                        <span>Departamento</span>
                     </div>
                     <div class="legend-item">
                         <span class="color-dot ruta"></span>
-                        <span>Ruta óptima</span>
+                        <span>Ruta optima</span>
                     </div>
                 </div>
             </aside>
@@ -83,12 +84,13 @@
         </main>
 
         <footer class="app-footer">
-            <p>Implementación del algoritmo de Dijkstra | Proyecto Universitario</p>
+            <p>Algoritmo de Dijkstra - Proyecto Universitario</p>
         </footer>
     </div>
 
+    <!-- Coloca tu API Key de Google Maps en el archivo config.js -->
     <script src="src/config.js"></script>
-    <script src="src/data/ciudades.js"></script>
+    <script src="src/data/departamentos.js"></script>
     <script src="src/algorithms/dijkstra.js"></script>
     <script src="src/map/map.js"></script>
     <script src="src/main.js"></script>

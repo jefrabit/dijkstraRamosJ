@@ -1,216 +1,90 @@
 /**
- * Data file containing real Peru departments with geographic coordinates
- * and connections between adjacent departments
+ * Departamentos del Perú con coordenadas y conexiones entre vecinos
  */
 
 const DEPARTAMENTOS = [
-    {
-        id: 'AM',
-        nombre: 'Amazonas',
-        lat: -6.2298,
-        lng: -77.8089,
-        vecinos: ['CA', 'LA', 'SM', 'LU']
-    },
-    {
-        id: 'AN',
-        nombre: 'Ancash',
-        lat: -9.5265,
-        lng: -77.5518,
-        vecinos: ['LI', 'HU', 'PA', 'LA']
-    },
-    {
-        id: 'AP',
-        nombre: 'Apurímac',
-        lat: -14.0684,
-        lng: -72.9087,
-        vecinos: ['CU', 'AY', 'IC', 'PU']
-    },
-    {
-        id: 'AR',
-        nombre: 'Arequipa',
-        lat: -16.4090,
-        lng: -71.5375,
-        vecinos: ['MO', 'CU', 'IC', 'PA']
-    },
-    {
-        id: 'AY',
-        nombre: 'Ayacucho',
-        lat: -13.1588,
-        lng: -74.2036,
-        vecinos: ['HU', 'JC', 'AP', 'IC']
-    },
-    {
-        id: 'CA',
-        nombre: 'Cajamarca',
-        lat: -5.4200,
-        lng: -78.8230,
-        vecinos: ['AM', 'LA', 'SM', 'PI']
-    },
-    {
-        id: 'CU',
-        nombre: 'Cusco',
-        lat: -13.5319,
-        lng: -71.9675,
-        vecinos: ['PA', 'AP', 'AR', 'MO', 'PU']
-    },
-    {
-        id: 'HU',
-        nombre: 'Huancavelica',
-        lat: -12.7868,
-        lng: -74.9728,
-        vecinos: ['AN', 'JC', 'AY', 'LI']
-    },
-    {
-        id: 'HU',
-        nombre: 'Huánuco',
-        lat: -9.9305,
-        lng: -76.2390,
-        vecinos: ['PA', 'SM', 'LA', 'AN', 'LI']
-    },
-    {
-        id: 'IC',
-        nombre: 'Ica',
-        lat: -14.0667,
-        lng: -75.6667,
-        vecinos: ['AR', 'AY', 'AP', 'LI']
-    },
-    {
-        id: 'JC',
-        nombre: 'Junín',
-        lat: -11.4958,
-        lng: -75.2044,
-        vecinos: ['HU', 'AY', 'LI', 'PA']
-    },
-    {
-        id: 'LA',
-        nombre: 'Lambayeque',
-        lat: -6.4884,
-        lng: -79.9233,
-        vecinos: ['PI', 'CA', 'AM', 'AN']
-    },
-    {
-        id: 'LI',
-        nombre: 'Lima',
-        lat: -12.0464,
-        lng: -77.0428,
-        vecinos: ['AN', 'HU', 'JC', 'IC']
-    },
-    {
-        id: 'LO',
-        nombre: 'Loreto',
-        lat: -4.3833,
-        lng: -73.2333,
-        vecinos: ['SM', 'AM']
-    },
-    {
-        id: 'MD',
-        nombre: 'Madre de Dios',
-        lat: -12.1500,
-        lng: -70.7500,
-        vecinos: ['CU', 'PU', 'TA']
-    },
-    {
-        id: 'MO',
-        nombre: 'Moquegua',
-        lat: -17.1933,
-        lng: -70.9329,
-        vecinos: ['AR', 'TA', 'PU']
-    },
-    {
-        id: 'PA',
-        nombre: 'Pasco',
-        lat: -10.6838,
-        lng: -75.2349,
-        vecinos: ['AN', 'HU', 'JC', 'CU']
-    },
-    {
-        id: 'PI',
-        nombre: 'Piura',
-        lat: -5.1945,
-        lng: -80.6328,
-        vecinos: ['LA', 'CA']
-    },
-    {
-        id: 'PU',
-        nombre: 'Puno',
-        lat: -15.8402,
-        lng: -70.0219,
-        vecinos: ['CU', 'AP', 'MO', 'MD']
-    },
-    {
-        id: 'SM',
-        nombre: 'San Martín',
-        lat: -6.7100,
-        lng: -76.3600,
-        vecinos: ['AM', 'CA', 'LO', 'HU']
-    },
-    {
-        id: 'TA',
-        nombre: 'Tacna',
-        lat: -18.0066,
-        lng: -70.2463,
-        vecinos: ['MO', 'MD']
-    },
-    {
-        id: 'TU',
-        nombre: 'Tumbes',
-        lat: -3.5667,
-        lng: -80.4500,
-        vecinos: ['PI']
-    },
-    {
-        id: 'UC',
-        nombre: 'Ucayali',
-        lat: -9.9300,
-        lng: -73.7000,
-        vecinos: ['HU', 'LO']
-    }
+    { id: 'TUMBES', nombre: 'Tumbes', lat: -3.8639, lng: -80.5273, vecinos: ['PIURA'] },
+    { id: 'PIURA', nombre: 'Piura', lat: -5.0512, lng: -80.2822, vecinos: ['TUMBES', 'LAMBAYEQUE', 'CAJAMARCA'] },
+    { id: 'LAMBAYEQUE', nombre: 'Lambayeque', lat: -6.3221, lng: -79.6655, vecinos: ['PIURA', 'CAJAMARCA', 'LA LIBERTAD'] },
+    { id: 'CAJAMARCA', nombre: 'Cajamarca', lat: -6.3878, lng: -78.8061, vecinos: ['PIURA', 'LAMBAYEQUE', 'LA LIBERTAD', 'AMAZONAS', 'SAN MARTIN'] },
+    { id: 'AMAZONAS', nombre: 'Amazonas', lat: -5.2118, lng: -77.9848, vecinos: ['CAJAMARCA', 'SAN MARTIN', 'LORETO'] },
+    { id: 'LA LIBERTAD', nombre: 'La Libertad', lat: -7.8460, lng: -78.2532, vecinos: ['LAMBAYEQUE', 'CAJAMARCA', 'SAN MARTIN', 'HUANUCO', 'ANCASH'] },
+    { id: 'SAN MARTIN', nombre: 'San Martín', lat: -6.9943, lng: -76.7510, vecinos: ['CAJAMARCA', 'AMAZONAS', 'LORETO', 'LA LIBERTAD', 'HUANUCO', 'UCAYALI'] },
+    { id: 'ANCASH', nombre: 'Ancash', lat: -9.4984, lng: -77.6608, vecinos: ['LA LIBERTAD', 'HUANUCO', 'PASCO', 'LIMA'] },
+    { id: 'LORETO', nombre: 'Loreto', lat: -4.5464, lng: -73.9955, vecinos: ['AMAZONAS', 'SAN MARTIN', 'UCAYALI', 'MADRE DE DIOS'] },
+    { id: 'HUANUCO', nombre: 'Huánuco', lat: -9.3238, lng: -75.9653, vecinos: ['LA LIBERTAD', 'SAN MARTIN', 'UCAYALI', 'PASCO', 'ANCASH'] },
+    { id: 'PASCO', nombre: 'Pasco', lat: -10.4560, lng: -75.4048, vecinos: ['ANCASH', 'HUANUCO', 'UCAYALI', 'JUNIN', 'LIMA'] },
+    { id: 'UCAYALI', nombre: 'Ucayali', lat: -9.5495, lng: -73.5397, vecinos: ['SAN MARTIN', 'LORETO', 'HUANUCO', 'PASCO', 'MADRE DE DIOS'] },
+    { id: 'LIMA', nombre: 'Lima', lat: -11.5657, lng: -76.7389, vecinos: ['ANCASH', 'PASCO', 'JUNIN', 'HUANCAVELICA', 'ICA', 'CALLAO'] },
+    { id: 'CALLAO', nombre: 'Callao', lat: -11.9370, lng: -77.1343, vecinos: ['LIMA'] },
+    { id: 'JUNIN', nombre: 'Junín', lat: -11.4889, lng: -74.9362, vecinos: ['PASCO', 'LIMA', 'HUANCAVELICA', 'AYACUCHO'] },
+    { id: 'HUANCAVELICA', nombre: 'Huancavelica', lat: -13.0832, lng: -75.0036, vecinos: ['LIMA', 'JUNIN', 'AYACUCHO', 'ICA'] },
+    { id: 'ICA', nombre: 'Ica', lat: -14.1774, lng: -75.5265, vecinos: ['LIMA', 'HUANCAVELICA', 'AYACUCHO', 'APURIMAC', 'AREQUIPA'] },
+    { id: 'AYACUCHO', nombre: 'Ayacucho', lat: -13.9953, lng: -74.0497, vecinos: ['JUNIN', 'HUANCAVELICA', 'ICA', 'APURIMAC', 'CUSCO'] },
+    { id: 'APURIMAC', nombre: 'Apurímac', lat: -14.0687, lng: -73.0142, vecinos: ['ICA', 'AYACUCHO', 'CUSCO', 'AREQUIPA'] },
+    { id: 'CUSCO', nombre: 'Cusco', lat: -13.3716, lng: -72.0757, vecinos: ['AYACUCHO', 'APURIMAC', 'AREQUIPA', 'MADRE DE DIOS', 'PUNO'] },
+    { id: 'MADRE DE DIOS', nombre: 'Madre de Dios', lat: -11.8171, lng: -70.9707, vecinos: ['LORETO', 'UCAYALI', 'CUSCO', 'PUNO'] },
+    { id: 'AREQUIPA', nombre: 'Arequipa', lat: -15.6580, lng: -72.6717, vecinos: ['ICA', 'APURIMAC', 'CUSCO', 'PUNO', 'MOQUEGUA'] },
+    { id: 'PUNO', nombre: 'Puno', lat: -16.3417, lng: -68.8767, vecinos: ['CUSCO', 'MADRE DE DIOS', 'AREQUIPA', 'MOQUEGUA', 'TACNA'] },
+    { id: 'MOQUEGUA', nombre: 'Moquegua', lat: -16.8002, lng: -70.7766, vecinos: ['AREQUIPA', 'PUNO', 'TACNA'] },
+    { id: 'TACNA', nombre: 'Tacna', lat: -17.5475, lng: -70.2611, vecinos: ['MOQUEGUA', 'PUNO'] }
 ];
 
-/**
- * Creates a graph representation from department data
- * @returns {Object} Graph with departments as nodes and neighbors as edges
- */
+let _grafoCache = null;
+
 function crearGrafo() {
+    if (_grafoCache) return _grafoCache;
+
+    const byId = {};
+    DEPARTAMENTOS.forEach(d => { byId[d.id] = d; });
+
     const grafo = {};
-    
-    DEPARTAMENTOS.forEach(dep => {
-        grafo[dep.id] = {
-            nombre: dep.nombre,
-            lat: dep.lat,
-            lng: dep.lng,
-            vecinos: {}
-        };
-    });
-    
-    DEPARTAMENTOS.forEach(dep => {
-        dep.vecinos.forEach(vecinoId => {
-            if (grafo[vecinoId]) {
-                grafo[dep.id].vecinos[vecinoId] = true;
-                grafo[vecinoId].vecinos[dep.id] = true;
+    for (const id in byId) {
+        const dep = byId[id];
+        grafo[id] = { id: dep.id, nombre: dep.nombre, lat: dep.lat, lng: dep.lng, vecinos: {} };
+    }
+
+    for (const id in byId) {
+        const dep = byId[id];
+        for (let i = 0; i < dep.vecinos.length; i++) {
+            const vecinoId = dep.vecinos[i];
+            const vecino = byId[vecinoId];
+            if (vecino) {
+                grafo[id].vecinos[vecinoId] = {
+                    id: vecino.id,
+                    nombre: vecino.nombre,
+                    distance: haversineDistance(dep.lat, dep.lng, vecino.lat, vecino.lng)
+                };
             }
-        });
-    });
-    
+        }
+    }
+
+    _grafoCache = grafo;
     return grafo;
 }
 
-/**
- * Get department by ID
- * @param {string} id - Department ID
- * @returns {Object|null} Department object or null
- */
-function getDepartamento(id) {
-    return DEPARTAMENTOS.find(d => d.id === id) || null;
+function haversineDistance(lat1, lng1, lat2, lng2) {
+    const TO_RAD = Math.PI / 180;
+    const R = 6371;
+    const dLat = (lat2 - lat1) * TO_RAD;
+    const dLng = (lng2 - lng1) * TO_RAD;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * TO_RAD) * Math.cos(lat2 * TO_RAD) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/**
- * Get all department names for dropdown
- * @returns {Array} Array of department names and IDs
- */
 function getDepartamentosList() {
-    return DEPARTAMENTOS.map(d => ({
-        id: d.id,
-        nombre: d.nombre
-    })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+    return DEPARTAMENTOS.map(d => ({ id: d.id, nombre: d.nombre }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+const _depMap = (() => {
+    const m = new Map();
+    DEPARTAMENTOS.forEach(d => m.set(d.id, d));
+    return m;
+})();
+
+function getDepartamento(id) {
+    return _depMap.get(id) || null;
 }

@@ -1,70 +1,30 @@
 /**
- * Configuration file for the Dijkstra Project
- * Contains global settings and API configuration
+ * Configuracion del proyecto
+ * Reemplaza TU_API_KEY_AQUI con tu clave de Google Maps
+ * Obtener clave: https://console.cloud.google.com/google/maps-apis
  */
 
+const GOOGLE_MAPS_API_KEY = 'AIzaSyDY8Gbdxg03Bh604ZB-IdrrZtQLMeFTOPU';
+
 const CONFIG = {
-    GOOGLE_MAPS_API_KEY: 'AIzaSyDY8Gbdxg03Bh604ZB-IdrrZtQLMeFTOPU',
-    
     MAP_CONFIG: {
-        center: { lat: -9.19, lng: -75.015 },
+        center: { lat: -10, lng: -75 },
         zoom: 5,
-        mapTypeId: 'roadmap',
-        styles: [
-            {
-                featureType: 'administrative.country',
-                elementType: 'labels',
-                stylers: [{ visibility: 'on' }]
-            }
-        ]
+        mapTypeId: 'roadmap'
     },
-    
-    MARKER_CONFIG: {
-        defaultIcon: null,
-        origenColor: '#22c55e',
-        destinoColor: '#ef4444'
-    },
-    
-    POLYLINE_CONFIG: {
-        conexiones: {
-            strokeColor: '#94a3b8',
-            strokeOpacity: 0.5,
-            strokeWeight: 2
-        },
-        rutaOptima: {
-            strokeColor: '#2563eb',
-            strokeOpacity: 1,
-            strokeWeight: 5
-        }
-    },
-    
-    DEPARTAMENTO_MARCADOR: {
-        icon: null,
-        title: ''
-    }
-};
 
-function loadGoogleMaps() {
-    if (typeof google !== 'undefined' && google.maps) {
-        return Promise.resolve(google.maps);
-    }
-    
-    return new Promise((resolve, reject) => {
-        if (!CONFIG.GOOGLE_MAPS_API_KEY || CONFIG.GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') {
-            reject(new Error('API Key no configurada. Edita src/config.js'));
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.GOOGLE_MAPS_API_KEY}&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => resolve(google.maps);
-        script.onerror = () => reject(new Error('Error al cargar Google Maps API'));
-        document.head.appendChild(script);
-    });
-}
+    GEOJSON_URL: 'peru-geojson/peru_departamental_simple.geojson',
 
-window.initMap = function() {
-    console.log('Google Maps cargado correctamente');
+    COLORS: {
+        defaultFill: '#64748b',
+        defaultFillOpacity: 0.25,
+        defaultStroke: '#334155',
+        defaultStrokeWeight: 1.5,
+        hoverFillOpacity: 0.5,
+        routeStroke: '#dc2626',
+        routeStrokeWeight: 4,
+        routeFillOpacity: 0.55,
+        originMarker: '#22c55e',
+        destMarker: '#ef4444'
+    }
 };

@@ -1,147 +1,88 @@
 /**
- * Main Application Controller
- * Connects the UI with the Dijkstra algorithm and Google Maps
+ * Controlador principal de la aplicacion
  */
 
-let googleMaps = null;
 let graph = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Inicializando aplicación...');
-    
-    await initializeGoogleMaps();
-    initializeApp();
+    try {
+        await loadGoogleMaps();
+        initMapModule();
+        loadDepartmentPolygons(CONFIG.GEOJSON_URL);
+        initializeApp();
+    } catch (err) {
+        showError(err.message);
+    }
 });
 
-async function initializeGoogleMaps() {
-    try {
-        if (!CONFIG.GOOGLE_MAPS_API_KEY || CONFIG.GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') {
-            showError('API Key no configurada. Edita src/config.js y reemplaza YOUR_API_KEY_HERE con tu clave de API de Google Maps.');
-            return;
-        }
-
-        googleMaps = await loadGoogleMaps();
-        initMapModule(googleMaps);
-        
-        const connections = getConnectionsCarreteras();
-        drawConnections(connections);
-        showAllCarreteras();
-        
-    } catch (error) {
-        console.error('Error al inicializar Google Maps:', error);
-        showError('Error al cargar Google Maps: ' + error.message);
-    }
-}
-
 function initializeApp() {
-    populateCarreteraSelects();
-    
-    const calculateBtn = document.getElementById('calcularRuta');
-    calculateBtn.addEventListener('click', handleCalculateRoute);
-    
-    const originSelect = document.getElementById('origen');
-    const destSelect = document.getElementById('destino');
-    
-    originSelect.addEventListener('change', handleOriginChange);
-    destSelect.addEventListener('change', handleDestChange);
+    populateDepartmentSelects();
+    document.getElementById('calcularRuta').addEventListener('click', handleCalculateRoute);
+    document.getElementById('origen').addEventListener('change', handleOriginChange);
+    document.getElementById('destino').addEventListener('change', handleDestChange);
 }
 
-function populateCarreteraSelects() {
+function populateDepartmentSelects() {
     const originSelect = document.getElementById('origen');
     const destSelect = document.getElementById('destino');
-    
-    const puntos = getPuntosCarretera();
-    
-    originSelect.innerHTML = '<option value="">Seleccionar punto de inicio...</option>';
-    destSelect.innerHTML = '<option value="">Seleccionar destino...</option>';
-    
-    puntos.forEach(punto => {
-        const originOption = document.createElement('option');
-        originOption.value = punto.id;
-        originOption.textContent = punto.nombre;
-        originSelect.appendChild(originOption);
-        
-        const destOption = document.createElement('option');
-        destOption.value = punto.id;
-        destOption.textContent = punto.nombre;
-        destSelect.appendChild(destOption);
+    const departamentos = getDepartamentosList();
+
+    originSelect.innerHTML = '<option value="">Seleccionar departamento de inicio...</option>';
+    destSelect.innerHTML = '<option value="">Seleccionar departamento destino...</option>';
+
+    departamentos.forEach(dep => {
+        const o1 = document.createElement('option');
+        o1.value = dep.id;
+        o1.textContent = dep.nombre;
+        originSelect.appendChild(o1);
+
+        const o2 = document.createElement('option');
+        o2.value = dep.id;
+        o2.textContent = dep.nombre;
+        destSelect.appendChild(o2);
     });
 }
 
 function handleOriginChange(e) {
-    const originId = e.target.value;
-    const destId = document.getElementById('destino').value;
-    
-    if (originId && destId) {
-        updateOriginMarker(originId);
-    }
-}
-
-function handleDestChange(e) {
-    const destId = e.target.value;
-    const originId = document.getElementById('origen').value;
-    
-    if (originId && destId) {
-        updateDestMarker(destId);
-    }
-}
-
-function updateOriginMarker(pointId) {
-    if (!googleMaps) return;
-    
-    const punto = getPuntoCarretera(pointId);
-    if (punto) {
-        markers[pointId]?.setMap(null);
-        createMarker(punto, 'origen');
-        
-        map.setCenter({ lat: punto.lat, lng: punto.lng });
+    const id = e.target.value;
+    if (!id) return;
+    const dep = getDepartamento(id);
+    if (dep) {
+        clearAll();
+        createMarker(dep, 'origen');
+        map.setCenter({ lat: dep.lat, lng: dep.lng });
         map.setZoom(7);
     }
 }
 
-function updateDestMarker(pointId) {
-    if (!googleMaps) return;
-    
-    const punto = getPuntoCarretera(pointId);
-    if (punto) {
-        markers[pointId]?.setMap(null);
-        createMarker(punto, 'destino');
-    }
+function handleDestChange(e) {
+    const id = e.target.value;
+    if (!id) return;
+    const dep = getDepartamento(id);
+    if (dep) createMarker(dep, 'destino');
 }
 
 function handleCalculateRoute() {
     const originId = document.getElementById('origen').value;
     const destId = document.getElementById('destino').value;
-    
-    if (!originId) {
-        showError('Por favor selecciona un punto de inicio');
-        return;
-    }
-    
-    if (!destId) {
-        showError('Por favor selecciona un destino');
-        return;
-    }
-    
-    if (originId === destId) {
-        showError('El origen y destino no pueden ser el mismo punto');
-        return;
-    }
-    
+    if (!originId) { showError('Selecciona un punto de inicio'); return; }
+    if (!destId) { showError('Selecciona un destino'); return; }
+    if (originId === destId) { showError('El origen y destino no pueden ser iguales'); return; }
     calculateAndShowRoute(originId, destId);
 }
 
 function calculateAndShowRoute(originId, destId) {
-    clearRoute();
-    
-    if (!graph) {
-        graph = crearGrafoCarreteras();
-    }
-    
+    clearAll();
+    if (!graph) graph = crearGrafo();
     const result = dijkstra(graph, originId, destId);
-    
+
     if (result.success) {
         drawRoute(result.path);
+        highlightRouteDepartments(result.path.map(p => p.id));
+        const o = getDepartamento(originId);
+        const d = getDepartamento(destId);
+        if (o) createMarker(o, 'origen');
+        if (d) createMarker(d, 'destino');
         displayResults(result);
         showSuccess('Ruta calculada exitosamente');
     } else {
@@ -150,37 +91,31 @@ function calculateAndShowRoute(originId, destId) {
 }
 
 function displayResults(result) {
-    const resultsPanel = document.getElementById('resultados');
-    const distanciaTotal = document.getElementById('distanciaTotal');
-    const numPuntos = document.getElementById('numDepartamentos');
+    const panel = document.getElementById('resultados');
+    document.getElementById('distanciaTotal').textContent = `${result.distance.toFixed(2)} km`;
+    document.getElementById('numDepartamentos').textContent = result.path.length;
+
     const trayecto = document.getElementById('trayecto');
-    
-    distanciaTotal.textContent = `${result.distance.toFixed(2)} km`;
-    numPuntos.textContent = result.path.length;
-    
     trayecto.innerHTML = '';
-    result.path.forEach((punto, index) => {
+    result.path.forEach((dep, i) => {
         const li = document.createElement('li');
-        li.textContent = `${punto.nombre} (${punto.carretera || 'Carretera'})`;
-        
-        if (index === 0) {
-            li.classList.add('origin');
-        } else if (index === result.path.length - 1) {
-            li.classList.add('destination');
-        } else {
-            li.classList.add('intermediate');
-        }
-        
+        li.textContent = dep.nombre;
+        li.className = i === 0 ? 'origin' : i === result.path.length - 1 ? 'destination' : 'intermediate';
         trayecto.appendChild(li);
     });
-    
-    resultsPanel.classList.remove('hidden');
+    panel.classList.remove('hidden');
 }
 
-function showError(message) {
-    alert('Error: ' + message);
-}
+function showError(msg) { showNotification(msg, 'error'); }
+function showSuccess(msg) { showNotification(msg, 'success'); }
 
-function showSuccess(message) {
-    console.log('Éxito: ' + message);
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+    notif.textContent = message;
+    notif.onclick = () => notif.remove();
+    container.appendChild(notif);
+    setTimeout(() => { if (notif.parentNode) notif.remove(); }, 4000);
 }

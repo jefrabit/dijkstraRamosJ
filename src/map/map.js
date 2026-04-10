@@ -1,206 +1,196 @@
 /**
- * Google Maps Integration Module
- * Handles map initialization, markers, polylines, and route visualization
+ * Integracion con Google Maps - Departamentos del Peru
  */
 
 let map = null;
 let markers = {};
-let connectionPolylines = [];
 let routePolyline = null;
+let departmentPolygons = {};
 let infoWindow = null;
 
-/**
- * Initialize Google Maps centered on Peru
- * @param {Object} googleMaps - Google Maps API object
- */
-function initMapModule(googleMaps) {
-    map = new googleMaps.Map(document.getElementById('map'), CONFIG.MAP_CONFIG);
-    infoWindow = new googleMaps.InfoWindow();
-    
-    document.getElementById('map-loading').style.display = 'none';
-    console.log('Mapa inicializado correctamente');
+function loadGoogleMaps() {
+    return new Promise((resolve, reject) => {
+        if (typeof google !== 'undefined' && google.maps) {
+            resolve();
+            return;
+        }
+        if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'TU_API_KEY_AQUI') {
+            reject(new Error('Configura tu API Key de Google Maps en src/config.js'));
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapCallback`;
+        script.async = true;
+        script.defer = true;
+        window.initMapCallback = resolve;
+        script.onerror = () => reject(new Error('Error al cargar Google Maps'));
+        document.head.appendChild(script);
+    });
 }
 
-/**
- * Create marker for a road point
- * @param {Object} punto - Road point data
- * @param {string} type - Marker type: 'default', 'origen', 'destino'
- */
+function initMapModule() {
+    map = new google.maps.Map(document.getElementById('map'), CONFIG.MAP_CONFIG);
+    infoWindow = new google.maps.InfoWindow();
+    document.getElementById('map-loading').style.display = 'none';
+}
+
+function loadDepartmentPolygons(geojsonUrl) {
+    const colors = [
+        '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6',
+        '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b',
+        '#2980b9', '#27ae60', '#8e44ad', '#d35400', '#2c3e50',
+        '#f1c40f', '#e84393', '#00b894', '#6c5ce7', '#fd79a8',
+        '#00cec9', '#fab1a0', '#74b9ff', '#a29bfe', '#ffeaa7'
+    ];
+
+    fetch(geojsonUrl)
+        .then(r => r.json())
+        .then(data => {
+            data.features.forEach((feature, index) => {
+                const nombre = feature.properties.NOMBDEP;
+                const coordinates = feature.geometry.coordinates;
+                const paths = coordinates.map(ring =>
+                    ring.map(c => ({ lat: c[1], lng: c[0] }))
+                );
+
+                const polygon = new google.maps.Polygon({
+                    paths: paths.length === 1 ? paths[0] : paths,
+                    strokeColor: CONFIG.COLORS.defaultStroke,
+                    strokeOpacity: 0.8,
+                    strokeWeight: CONFIG.COLORS.defaultStrokeWeight,
+                    fillColor: colors[index % colors.length],
+                    fillOpacity: CONFIG.COLORS.defaultFillOpacity,
+                    map: map
+                });
+
+                polygon.addListener('click', function(event) {
+                    infoWindow.setContent(`<div style="padding:8px"><strong>${nombre}</strong></div>`);
+                    infoWindow.setPosition(event.latLng);
+                    infoWindow.open(map);
+                });
+
+                polygon.addListener('mouseover', function() {
+                    this.setOptions({ fillOpacity: CONFIG.COLORS.hoverFillOpacity });
+                });
+                polygon.addListener('mouseout', function() {
+                    if (!this._highlighted) {
+                        this.setOptions({ fillOpacity: CONFIG.COLORS.defaultFillOpacity });
+                    }
+                });
+
+                departmentPolygons[nombre] = polygon;
+            });
+        })
+        .catch(err => {
+            console.error('Error cargando GeoJSON:', err);
+            showError('No se pudo cargar el mapa de departamentos');
+        });
+}
+
 function createMarker(punto, type = 'default') {
-    if (!map || !google.maps) return null;
-    
-    let icon = null;
-    let title = punto.nombre;
-    
-    if (type === 'origen') {
-        icon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 12,
-            fillColor: '#22c55e',
-            fillOpacity: 1,
-            strokeColor: '#166534',
-            strokeWeight: 3
-        };
-    } else if (type === 'destino') {
-        icon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 12,
-            fillColor: '#ef4444',
-            fillOpacity: 1,
-            strokeColor: '#991b1b',
-            strokeWeight: 3
-        };
+    if (!map) return null;
+    if (markers[punto.id]) {
+        markers[punto.id].setMap(null);
     }
-    
+
+    let color, radius;
+    if (type === 'origen') {
+        color = CONFIG.COLORS.originMarker;
+        radius = 12;
+    } else if (type === 'destino') {
+        color = CONFIG.COLORS.destMarker;
+        radius = 12;
+    } else {
+        color = '#64748b';
+        radius = 6;
+    }
+
     const marker = new google.maps.Marker({
         position: { lat: punto.lat, lng: punto.lng },
         map: map,
-        title: title,
-        icon: icon,
-        animation: google.maps.Animation.DROP
+        title: punto.nombre,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: radius,
+            fillColor: color,
+            fillOpacity: type === 'default' ? 0.6 : 1,
+            strokeColor: color,
+            strokeWeight: 2
+        }
     });
-    
-    marker.addListener('click', () => {
-        infoWindow.setContent(`
-            <div style="padding: 8px; max-width: 250px;">
-                <strong style="font-size: 14px;">${punto.nombre}</strong><br>
-                <span style="color: #666;">${punto.carretera || 'Carretera'}</span><br>
-                <span style="color: #888; font-size: 12px;">
-                    Lat: ${punto.lat.toFixed(4)}, Lng: ${punto.lng.toFixed(4)}
-                </span>
-            </div>
-        `);
-        infoWindow.open(map, marker);
-    });
-    
+
     markers[punto.id] = marker;
     return marker;
 }
 
-/**
- * Draw all connections between neighboring road points
- * @param {Array} connections - Array of connection objects
- */
-function drawConnections(connections) {
-    if (!map || !google.maps) return;
-    
-    clearConnections();
-    
-    connections.forEach(conn => {
-        const polyline = new google.maps.Polyline({
-            path: [
-                { lat: conn.from.lat, lng: conn.from.lng },
-                { lat: conn.to.lat, lng: conn.to.lng }
-            ],
-            ...CONFIG.POLYLINE_CONFIG.conexiones,
-            map: map
-        });
-        connectionPolylines.push(polyline);
-    });
-}
-
-/**
- * Draw the optimal route on the map
- * @param {Array} path - Array of road point objects representing the path
- */
 function drawRoute(path) {
-    if (!map || !google.maps || !path || path.length === 0) return;
-    
+    if (!map || !path || path.length === 0) return;
     clearRoute();
-    
-    const routePath = path.map(p => ({ lat: p.lat, lng: p.lng }));
-    
+
+    const latlngs = path.map(p => ({ lat: p.lat, lng: p.lng }));
     routePolyline = new google.maps.Polyline({
-        path: routePath,
-        ...CONFIG.POLYLINE_CONFIG.rutaOptima,
+        path: latlngs,
+        strokeColor: CONFIG.COLORS.routeStroke,
+        strokeOpacity: 1,
+        strokeWeight: CONFIG.COLORS.routeStrokeWeight,
+        geodesic: true,
         map: map
     });
-    
+
     const bounds = new google.maps.LatLngBounds();
     path.forEach(p => bounds.extend({ lat: p.lat, lng: p.lng }));
-    map.fitBounds(bounds);
+    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
 }
 
-/**
- * Clear all connection lines from the map
- */
-function clearConnections() {
-    connectionPolylines.forEach(polyline => polyline.setMap(null));
-    connectionPolylines = [];
-}
+function highlightRouteDepartments(pathIds) {
+    Object.values(departmentPolygons).forEach(poly => {
+        poly.setOptions({
+            strokeColor: CONFIG.COLORS.defaultStroke,
+            strokeWeight: CONFIG.COLORS.defaultStrokeWeight,
+            fillOpacity: CONFIG.COLORS.defaultFillOpacity
+        });
+        poly._highlighted = false;
+    });
 
-/**
- * Clear the optimal route from the map
- */
-function clearRoute() {
-    if (routePolyline) {
-        routePolyline.setMap(null);
-        routePolyline = null;
-    }
-}
-
-/**
- * Highlight origin and destination markers
- * @param {string} originId - Origin road point ID
- * @param {string} destId - Destination road point ID
- */
-function highlightMarkers(originId, destId) {
-    Object.keys(markers).forEach(id => {
-        const marker = markers[id];
-        if (id === originId) {
-            createMarker(CARRETERAS[id], 'origen');
-        } else if (id === destId) {
-            createMarker(CARRETERAS[id], 'destino');
+    pathIds.forEach(id => {
+        const dep = DEPARTAMENTOS.find(d => d.id === id);
+        if (dep && departmentPolygons[dep.nombre]) {
+            const poly = departmentPolygons[dep.nombre];
+            poly.setOptions({
+                strokeColor: CONFIG.COLORS.routeStroke,
+                strokeWeight: 3.5,
+                fillOpacity: CONFIG.COLORS.routeFillOpacity
+            });
+            poly._highlighted = true;
         }
     });
 }
 
-/**
- * Clear all markers from the map
- */
+function clearRoute() {
+    if (routePolyline) { routePolyline.setMap(null); routePolyline = null; }
+    Object.values(departmentPolygons).forEach(poly => {
+        poly.setOptions({
+            strokeColor: CONFIG.COLORS.defaultStroke,
+            strokeWeight: CONFIG.COLORS.defaultStrokeWeight,
+            fillOpacity: CONFIG.COLORS.defaultFillOpacity
+        });
+        poly._highlighted = false;
+    });
+}
+
 function clearMarkers() {
-    Object.values(markers).forEach(marker => marker.setMap(null));
+    Object.values(markers).forEach(m => m.setMap(null));
     markers = {};
 }
 
-/**
- * Reset map to initial view
- */
 function resetMapView() {
     if (!map) return;
     map.setCenter(CONFIG.MAP_CONFIG.center);
     map.setZoom(CONFIG.MAP_CONFIG.zoom);
 }
 
-/**
- * Clear all map elements
- */
 function clearAll() {
     clearMarkers();
-    clearConnections();
     clearRoute();
     resetMapView();
-}
-
-/**
- * Show all road points as markers on the map
- */
-function showAllCarreteras() {
-    clearMarkers();
-    Object.values(CARRETERAS).forEach(punto => createMarker(punto, 'default'));
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        initMapModule,
-        createMarker,
-        drawConnections,
-        drawRoute,
-        clearConnections,
-        clearRoute,
-        clearMarkers,
-        resetMapView,
-        clearAll,
-        showAllCarreteras
-    };
 }

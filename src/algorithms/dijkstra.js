@@ -1,227 +1,147 @@
 /**
- * Dijkstra's Algorithm Implementation
- * 
- * This file implements the Dijkstra algorithm from scratch to find
- * the shortest path between departments in Peru.
- * 
- * The algorithm works by:
- * 1. Starting from the origin node
- * 2. Exploring neighbors and calculating distances
- * 3. Using a priority queue to always process the nearest unvisited node
- * 4. Building a shortest path tree from the origin
- * 5. Backtracking from destination to reconstruct the optimal path
+ * Algoritmo de Dijkstra - Implementación con Min-Heap
+ * Encuentra la ruta más corta entre departamentos del Perú.
  */
 
-/**
- * Priority Queue Implementation
- * Used by Dijkstra to always process the node with minimum distance
- */
-class PriorityQueue {
+class MinHeap {
     constructor() {
-        this.elements = [];
+        this.heap = [];
+        this.posMap = {};
     }
 
-    enqueue(element, priority) {
-        this.elements.push({ element, priority });
-        this.elements.sort((a, b) => a.priority - b.priority);
+    _swap(i, j) {
+        const temp = this.heap[i];
+        this.heap[i] = this.heap[j];
+        this.heap[j] = temp;
+        this.posMap[this.heap[i].id] = i;
+        this.posMap[this.heap[j].id] = j;
     }
 
-    dequeue() {
-        return this.elements.shift()?.element;
+    _bubbleUp(idx) {
+        while (idx > 0) {
+            const parent = (idx - 1) >> 1;
+            if (this.heap[idx].priority >= this.heap[parent].priority) break;
+            this._swap(idx, parent);
+            idx = parent;
+        }
+    }
+
+    _bubbleDown(idx) {
+        const len = this.heap.length;
+        while (true) {
+            let smallest = idx;
+            const left = (idx << 1) + 1;
+            const right = left + 1;
+            if (left < len && this.heap[left].priority < this.heap[smallest].priority) smallest = left;
+            if (right < len && this.heap[right].priority < this.heap[smallest].priority) smallest = right;
+            if (smallest === idx) break;
+            this._swap(idx, smallest);
+            idx = smallest;
+        }
+    }
+
+    push(id, priority) {
+        this.heap.push({ id, priority });
+        this.posMap[id] = this.heap.length - 1;
+        this._bubbleUp(this.heap.length - 1);
+    }
+
+    pop() {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) {
+            const node = this.heap.pop();
+            delete this.posMap[node.id];
+            return node;
+        }
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this.posMap[this.heap[0].id] = 0;
+        delete this.posMap[min.id];
+        this._bubbleDown(0);
+        return min;
+    }
+
+    decreaseKey(id, newPriority) {
+        const idx = this.posMap[id];
+        if (idx === undefined) return;
+        this.heap[idx].priority = newPriority;
+        this._bubbleUp(idx);
+    }
+
+    has(id) {
+        return this.posMap[id] !== undefined;
     }
 
     isEmpty() {
-        return this.elements.length === 0;
-    }
-
-    contains(element) {
-        return this.elements.some(e => e.element === element);
-    }
-
-    updatePriority(element, newPriority) {
-        const index = this.elements.findIndex(e => e.element === element);
-        if (index !== -1) {
-            this.elements[index].priority = newPriority;
-            this.elements.sort((a, b) => a.priority - b.priority);
-        }
+        return this.heap.length === 0;
     }
 }
 
-/**
- * Calculate distance between two geographic points using Haversine formula
- * @param {number} lat1 - Latitude of first point
- * @param {number} lng1 - Longitude of first point
- * @param {number} lat2 - Latitude of second point
- * @param {number} lng2 - Longitude of second point
- * @returns {number} Distance in kilometers
- */
-function haversineDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371;
-    const dLat = toRadians(lat2 - lat1);
-    const dLng = toRadians(lng2 - lng1);
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
-
-function toRadians(degrees) {
-    return degrees * (Math.PI / 180);
-}
-
-/**
- * Build graph from department data
- * @param {Array} departamentos - Array of department objects
- * @returns {Object} Graph structure
- */
-function buildGraph(departamentos) {
-    const graph = {};
-    
-    departamentos.forEach(dep => {
-        graph[dep.id] = {
-            id: dep.id,
-            nombre: dep.nombre,
-            lat: dep.lat,
-            lng: dep.lng,
-            vecinos: {}
-        };
-    });
-    
-    departamentos.forEach(dep => {
-        dep.vecinos.forEach(vecinoId => {
-            const neighbor = departamentos.find(d => d.id === vecinoId);
-            if (neighbor) {
-                const distance = haversineDistance(
-                    dep.lat, dep.lng,
-                    neighbor.lat, neighbor.lng
-                );
-                graph[dep.id].vecinos[vecinoId] = {
-                    id: neighbor.id,
-                    nombre: neighbor.nombre,
-                    distance: distance
-                };
-            }
-        });
-    });
-    
-    return graph;
-}
-
-/**
- * Get connections between departments (without weights)
- * Used for drawing all possible connections on the map
- * @param {Array} departamentos - Array of department objects
- * @returns {Array} Array of connection pairs
- */
-function getConnections(departamentos) {
-    const connections = [];
-    const seen = new Set();
-    
-    departamentos.forEach(dep => {
-        dep.vecinos.forEach(vecinoId => {
-            const key = [dep.id, vecinoId].sort().join('-');
-            if (!seen.has(key)) {
-                seen.add(key);
-                const neighbor = departamentos.find(d => d.id === vecinoId);
-                if (neighbor) {
-                    connections.push({
-                        from: { id: dep.id, nombre: dep.nombre, lat: dep.lat, lng: dep.lng },
-                        to: { id: neighbor.id, nombre: neighbor.nombre, lat: neighbor.lat, lng: neighbor.lng }
-                    });
-                }
-            }
-        });
-    });
-    
-    return connections;
-}
-
-/**
- * Main Dijkstra algorithm implementation
- * @param {Object} graph - Graph structure with departments and neighbors
- * @param {string} startId - Origin department ID
- * @param {string} endId - Destination department ID
- * @returns {Object} Result with path and total distance
- */
 function dijkstra(graph, startId, endId) {
+    if (!graph[startId] || !graph[endId]) {
+        return { success: false, message: 'Origen o destino no válidos', path: [], distance: 0 };
+    }
+    if (startId === endId) {
+        const node = graph[startId];
+        return {
+            success: true,
+            path: [{ id: startId, nombre: node.nombre, lat: node.lat, lng: node.lng }],
+            distance: 0,
+            message: `Origen y destino son el mismo: ${node.nombre}`
+        };
+    }
+
     const distances = {};
     const previous = {};
     const visited = new Set();
-    const pq = new PriorityQueue();
-    
-    Object.keys(graph).forEach(nodeId => {
-        distances[nodeId] = Infinity;
+    const pq = new MinHeap();
+
+    for (const nodeId in graph) {
+        distances[nodeId] = nodeId === startId ? 0 : Infinity;
         previous[nodeId] = null;
-    });
-    
-    distances[startId] = 0;
-    pq.enqueue(startId, 0);
-    
+    }
+
+    pq.push(startId, 0);
+
     while (!pq.isEmpty()) {
-        const currentId = pq.dequeue();
-        
-        if (currentId === endId) {
-            break;
-        }
-        
-        if (visited.has(currentId)) {
-            continue;
-        }
-        
+        const { id: currentId } = pq.pop();
+        if (visited.has(currentId)) continue;
         visited.add(currentId);
-        
-        const currentNode = graph[currentId];
-        const neighbors = currentNode.vecinos;
-        
-        Object.keys(neighbors).forEach(neighborId => {
-            if (visited.has(neighborId)) {
-                return;
-            }
-            
-            const neighbor = neighbors[neighborId];
-            const newDistance = distances[currentId] + neighbor.distance;
-            
-            if (newDistance < distances[neighborId]) {
-                distances[neighborId] = newDistance;
+        if (currentId === endId) break;
+
+        const neighbors = graph[currentId].vecinos;
+        for (const neighborId in neighbors) {
+            if (visited.has(neighborId)) continue;
+            const newDist = distances[currentId] + neighbors[neighborId].distance;
+            if (newDist < distances[neighborId]) {
+                distances[neighborId] = newDist;
                 previous[neighborId] = currentId;
-                pq.enqueue(neighborId, newDistance);
+                if (pq.has(neighborId)) {
+                    pq.decreaseKey(neighborId, newDist);
+                } else {
+                    pq.push(neighborId, newDist);
+                }
             }
-        });
+        }
     }
-    
+
     if (distances[endId] === Infinity) {
-        return {
-            success: false,
-            message: 'No existe ruta entre los departamentos seleccionados',
-            path: [],
-            distance: 0
-        };
+        return { success: false, message: 'No existe ruta entre los departamentos seleccionados', path: [], distance: 0 };
     }
-    
+
     const path = [];
-    let currentId = endId;
-    
-    while (currentId !== null) {
-        path.unshift({
-            id: currentId,
-            nombre: graph[currentId].nombre,
-            lat: graph[currentId].lat,
-            lng: graph[currentId].lng
-        });
-        currentId = previous[currentId];
+    let curr = endId;
+    while (curr !== null) {
+        const node = graph[curr];
+        path.push({ id: curr, nombre: node.nombre, lat: node.lat, lng: node.lng });
+        curr = previous[curr];
     }
-    
+    path.reverse();
+
     return {
         success: true,
         path: path,
         distance: distances[endId],
         message: `Ruta encontrada: ${path.map(p => p.nombre).join(' → ')}`
     };
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { haversineDistance, buildGraph, getConnections, dijkstra, PriorityQueue };
 }
